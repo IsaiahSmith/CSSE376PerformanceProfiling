@@ -53,6 +53,7 @@ public class Level {
 	private int mapWidth; // The map array width.
 	private int mapHeight; // The map array height.
 	private int[][] map; // The map array. (height, width)
+	private int[][] otherMap; // A map array to work as a cache
 	private int tileSize; // The tileSize. Preferably 32.
 	private ArrayList<Rectangle2D.Double> barrierCollisionBoxes; // The
 																	// arraylist
@@ -212,6 +213,7 @@ public class Level {
 			this.mapHeight = Integer.parseInt(imageReader.readLine());
 
 			this.map = new int[this.mapHeight][this.mapWidth];
+			this.otherMap = new int[this.mapHeight][this.mapWidth];
 
 			for (int r = 0; r < this.map.length; r++) {
 				// Get line of numbers and spaces.
@@ -232,7 +234,8 @@ public class Level {
 			generateBarrierCollisionBoxes();
 			generateRegularCollisionBoxes();
 			generateGoldObjects();
-
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -334,10 +337,14 @@ public class Level {
 		for (int r = 0; r < this.map.length; r++) {
 			for (int c = 0; c < this.map[r].length; c++) {
 				currentPosition = this.map[r][c];
-				drawTileImage(currentPosition, r, c, g);
+				if(otherMap[r][c] != this.map[r][c]){
+					drawTileImage(currentPosition, r, c, g);
+					otherMap[r][c] = currentPosition;
+				}
 			}
 		}
 		g.dispose();
+
 		// draw cached tiles
 		g2.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), null);
 	}
@@ -384,6 +391,10 @@ public class Level {
 	 */
 	public void updateTile(int x, int y, int tileID) {
 		this.map[x][y] = tileID;
+		
+		Graphics2D g = img.createGraphics();
+		this.drawTileImage(tileID, x, y, g);
+		g.dispose();
 	}
 
 	/**
